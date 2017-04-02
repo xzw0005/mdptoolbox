@@ -12,9 +12,16 @@ import time
 
 PROBLEM = "Bandit"
 INSTANCE_NUMBER = 1
-INITIAL_STATE = [0,0,0,0]
-# INSTANCE_NUMBER = 1
-# INITIAL_STATE = [0,0,0,0]
+DISCOUNT = False
+
+if INSTANCE_NUMBER == 1:
+    INITIAL_STATE = [0,0,0,0]
+elif INSTANCE_NUMBER == 2:
+    INITIAL_STATE = [0,0,1,1]
+if not DISCOUNT:
+    gamma = 1.0
+else:
+    gamma = 0.95
 
 ACTIONS = 4
 STATES = 3**ACTIONS
@@ -43,8 +50,13 @@ def getTransitionAndRewardMatrices():
     return (P, R)
 
 def transitionProbability(currentState, action, nextState):
-    othersEqual = [currentState[i]==nextState[i] for i in range(ACTIONS) if i != action]
-    if sum(othersEqual) < ACTIONS - 1:
+#    othersEqual = [currentState[i]==nextState[i] for i in range(ACTIONS) if i != action]
+#    print len(othersEqual)
+    othersEqual = 0
+    for i in range(ACTIONS):
+        if (i != action) and (currentState[i] == nextState[i]):
+            othersEqual += 1
+    if othersEqual < ACTIONS - 1:
         return 0.
     if currentState[action] == 0:
         if nextState[action] == 0:
@@ -63,6 +75,7 @@ def transitionProbability(currentState, action, nextState):
 def immediateReward(currentState, action):
     if (currentState[action] == 1):
         finishTaskReward = (action+1) ** 2
+#         expectedReward = finishTaskReward * 0.5
         finishTaskState = copy.copy(currentState)
         finishTaskState[action] = 2
         finishTaskProbability = transitionProbability(currentState, action, finishTaskState)
@@ -84,7 +97,7 @@ def reachableStates(stateTuple, action):
 if __name__ == "__main__":
     P, R = getTransitionAndRewardMatrices()
     startTime = time.time()
-    fh = mdptoolbox.mdp.FiniteHorizon(P, R, 1, HORIZON)
+    fh = mdptoolbox.mdp.FiniteHorizon(P, R, gamma, HORIZON)
     print P[0].shape
     fh.run()
     elaspedTime = time.time() - startTime
@@ -92,13 +105,15 @@ if __name__ == "__main__":
     value = fh.V
     policy = fh.policy
     for s in range(policy.shape[0]):
-#         print 'State: ', convertIndexToList(s), ' ------> Policy: ', policy[s,:]
-#         print 'State: ', convertIndexToList(s), ' ------> Values: ', value[s,:]
+        print 'State: ', convertIndexToList(s), ' ------> Policy: ', policy[s,:]
+        print '\t', ' ------> Values: ', value[s,:]
         if s == convertListToIndex(INITIAL_STATE):
             optimalPolicy = str(policy[s, :])
             expectedReward = value[s, 0]
-            
-    f = open("sol_%s_%s_mdptoolbox.txt" % (PROBLEM, INSTANCE_NUMBER), 'w')
+    if not DISCOUNT:
+        f = open("sol_%s_%s_mdptoolbox.txt" % (PROBLEM, INSTANCE_NUMBER), 'w')
+    else:
+        f = open("sol_%s_%s_discount_mdptoolbox.txt" % (PROBLEM, INSTANCE_NUMBER), 'w')        
 #     f.write('\t\t' +' ------> Values: ' + np.array2string(value[s,:], precision=4) + '\n')
 #     f = open("sol_%s_%d.txt" % (PROBLEM, INSTANCE_NUMBER), 'w')
     f.write('Xing Wang\n')

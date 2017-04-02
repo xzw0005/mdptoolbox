@@ -1,7 +1,7 @@
 Xing Wang
 Problem: Bandit_1
 CPU Time: 0.0020 seconds
-Expected Total Reward: 24.91 
+Expected Total Reward: 27.3850 
 Optimal Policy: [3 3 3 3 3 3 3 3 3 0] 
 State: [0, 0, 0, 0] ------> Policy: [3 3 3 3 3 3 3 3 3 0]
 State: [0, 0, 0, 1] ------> Policy: [3 3 3 3 3 3 3 3 3 3]

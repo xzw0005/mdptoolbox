@@ -20,7 +20,7 @@ class QueueControl(object):
     classdocs
     '''
 
-    def __init__(self, N=10, K=100, R1 = 2.0, R2 = 1.3, opt='a'):
+    def __init__(self, N=10, K=100, R1 = 2.0, R2 = 1.3, opt='a', discount = False):
         '''
         Constructor
         '''
@@ -34,6 +34,7 @@ class QueueControl(object):
         self.F1bar = []
         self.F2bar = [];
         self.initProbs(opt)
+        self.discount = discount
 
     def actionsLookupDictionary(self):
         getIndexByAction = {}
@@ -85,18 +86,6 @@ class QueueControl(object):
         return self.g[sprime]
     
     def getTransitionMatrix(self):
-#         #P = [dok_matrix((self.K+1, self.K+1)) for a in range(self.numA)]
-#         pa = dok_matrix((self.K+1, self.K+1))
-#         rowsum = 0
-#         for sprime in range(self.K+1):
-#             rowsum += self.g[sprime]
-#             for s in range(self.K+1):
-#                 pa[s, sprime] = self.g[sprime]
-# #         print pa.sum(axis=1)
-# #        print pa.todense()[self.K, :]
-#         P = [pa.tocsr()] * self.numA
-#         return P        
-        
         #P = [dok_matrix((self.K+1, self.K+1)) for a in range(self.numA)]
         pa = dok_matrix((self.K+1, self.K+1))
         rowsum = 0
@@ -119,7 +108,6 @@ class QueueControl(object):
                 reward = self.immediateReward(a)
                 index = self.getIndexByAction[tuple(a)]
                 R[s, index] = reward
-#         print R[100, :]
         return R
         
     def feasibleActions(self, state):
@@ -137,13 +125,18 @@ class QueueControl(object):
     
     def solveMDP(self):
         P, R = self.getmdp()
-        fh = mdptoolbox.mdp.FiniteHorizon(P, R, .95, self.N)
+        if DISCOUNT is True:
+            gamma = 0.95
+        else:
+            gamma = 1.0
+        fh = mdptoolbox.mdp.FiniteHorizon(P, R, gamma, self.N)
         fh.run()
         return fh
 
 if __name__ == "__main__":
-    OPT = 'd'
-    instance = QueueControl(N=10, K=100, R1 = 10, R2 = 30, opt=OPT)
+    OPT = 'a'
+    DISCOUNT = True
+    instance = QueueControl(N=10, K=100, R1 = 10, R2 = 30, opt=OPT, discount=DISCOUNT)
 #    instance.getmdp()
     startTime = time.time()
     res = instance.solveMDP()
@@ -156,8 +149,8 @@ if __name__ == "__main__":
     for s in range(len(policy)):
         dtList = list(policy[s])
         dtList = [instance.getActionByIndex[dt] for dt in dtList]
-#         print 'State: ', s, ' ------> ', dtList
-#         print value[s]
+        print 'State: ', s, ' ------> ', dtList
+        print value[s]
 #         f.write('State: ' +  str(s) + ' ------> Policy: ' + str(dtList) + '\n')
 #         f.write('\t' +' ------> Values: ' + np.array2string(value[s,:], precision=4) + '\n')
         if s == 50:
@@ -166,8 +159,10 @@ if __name__ == "__main__":
     print expectedReward
 #     f.write('State: ' +  str(convertIndexToList(s)) + ' ------> Policy: ' + str(policy[s,:]) + '\n')
 #     f.write('\t\t' +' ------> Values: ' + np.array2string(value[s,:], precision=4) + '\n')
-        
-    f = open("sol_%s_%s_discount_mdptoolbox.txt" % (PROBLEM, OPT), 'w')
+    if instance.discount is False:   
+        f = open("sol_%s_%s_mdptoolbox.txt" % (PROBLEM, OPT), 'w')
+    else:
+        f = open("sol_%s_%s_discount_mdptoolbox.txt" % (PROBLEM, OPT), 'w')
     f.write('Xing Wang\n')
     f.write("Problem: %s_%s\n" % (PROBLEM, OPT))
     f.write("CPU Time: %.4f seconds\n" % elaspedTime)
@@ -177,8 +172,4 @@ if __name__ == "__main__":
         dtList = list(policy[s])
         dtList = [instance.getActionByIndex[dt] for dt in dtList]
         f.write('State: '+ str(s) + ' ------> '+ str(dtList) +'\n' )
-    f.close()
- 
-#     print instance.getTransitionMatrix().tocsr().sum(axis=1)
-#     print instance.getRewardMatrix().shape
-    
+    f.close()   

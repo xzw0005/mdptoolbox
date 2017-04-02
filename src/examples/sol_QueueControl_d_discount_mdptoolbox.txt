@@ -1,6 +1,6 @@
 Xing Wang
 Problem: QueueControl_d
-CPU Time: 12.6570 seconds
+CPU Time: 11.9140 seconds
 Expected Total Reward: 7081.2696 
 Optimal Policy: 
  State: 0 ------> [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]

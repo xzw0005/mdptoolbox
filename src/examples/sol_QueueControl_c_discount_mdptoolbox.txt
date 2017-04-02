@@ -1,6 +1,6 @@
 Xing Wang
 Problem: QueueControl_c
-CPU Time: 11.6580 seconds
+CPU Time: 11.8460 seconds
 Expected Total Reward: 4909.2529 
 Optimal Policy: 
  State: 0 ------> [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
